@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 # -------------------------------------------
 # CONFIGURATION & INITIALIZATION
 # -------------------------------------------
-# Load local .env (useful for local development) and/or use Streamlit secrets
+# Load .env for local development and st.secrets for deployed environment
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
 if not openai_api_key:
@@ -14,9 +14,9 @@ if not openai_api_key:
     st.stop()
 
 openai.api_key = openai_api_key
-MODEL = "gpt-4o"  # Adjust as needed
+MODEL = "gpt-4o"  # Adjust the model as needed
 
-# System message: instructs the assistant about its role.
+# Define a system message that establishes context (this is kept in the background)
 system_message = (
     "You are an expert assistant for Odoo post-implementation support. "
     "You have access to the full Odoo documentation and can help users with issues, configurations, best practices, and troubleshooting. "
@@ -24,10 +24,7 @@ system_message = (
     "If unsure, politely suggest checking with Odoo support or official forums."
 )
 
-# -------------------------------------------
-# SESSION STATE SETUP
-# -------------------------------------------
-# Initialize conversation history only once.
+# Initialize conversation history in session_state (this is not shown on the UI)
 if "conversation" not in st.session_state:
     st.session_state.conversation = [{"role": "system", "content": system_message}]
 
@@ -35,48 +32,35 @@ if "conversation" not in st.session_state:
 # STREAMLIT LAYOUT
 # -------------------------------------------
 st.title("Odoo Post-Implementation Support Chatbot")
-st.markdown("This chatbot retains conversation history so that it can understand context from previous messages.")
+# (Optional) Remove any descriptive text if you want a minimal chat-like UI.
+# st.markdown("This chatbot uses conversation context behind the scenes.")
 
-# -------------------------------------------
-# HELPER FUNCTION: Generate ChatGPT Response
-# -------------------------------------------
-def generate_response(user_message):
-    # Append user's new message to the conversation history.
-    st.session_state.conversation.append({"role": "user", "content": user_message})
+# Create a form that clears input on submission.
+with st.form("chat_form", clear_on_submit=True):
+    user_input = st.text_input("Your message:", placeholder="Ask about Odoo support...")
+    submitted = st.form_submit_button("Send")
+
+# When the form is submitted and there is user input:
+if submitted and user_input:
+    # Append the user's message to the conversation history.
+    st.session_state.conversation.append({"role": "user", "content": user_input})
     
-    # Generate a response using the entire conversation history.
+    # Generate the assistant's response using the entire conversation as context.
     try:
         response = openai.ChatCompletion.create(
             model=MODEL,
             messages=st.session_state.conversation,
-            stream=False,  # Change to True if you want streaming (and update the UI accordingly)
+            stream=False
         )
         assistant_reply = response.choices[0].message.content
     except Exception as e:
         assistant_reply = f"Error: {e}"
     
-    # Append assistant's reply to the conversation history.
+    # Append the assistant's reply to the conversation history.
     st.session_state.conversation.append({"role": "assistant", "content": assistant_reply})
+    
+    # Display only the latest assistant reply.
+    st.markdown("**Assistant:**")
+    st.markdown(assistant_reply)
 
-# -------------------------------------------
-# USER INPUT SECTION
-# -------------------------------------------
-# You can use a form or simple text input with a button.
-user_input = st.text_input("Your message:", placeholder="Type your question here...")
-
-# When the user clicks the "Send" button, process the input.
-if st.button("Send") and user_input:
-    generate_response(user_input)
-    # Optionally clear the text input by re-running the script:
-    st.experimental_rerun()
-
-# -------------------------------------------
-# DISPLAY CONVERSATION HISTORY
-# -------------------------------------------
-st.markdown("### Conversation History")
-for msg in st.session_state.conversation:
-    if msg["role"] == "user":
-        st.markdown(f"**You:** {msg['content']}")
-    elif msg["role"] == "assistant":
-        st.markdown(f"**Assistant:** {msg['content']}")
 
