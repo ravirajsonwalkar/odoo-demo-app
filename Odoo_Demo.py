@@ -52,26 +52,30 @@ st.markdown("""
         max-height: 500px;
         overflow-y: auto;
         padding: 10px;
-        background-color: #f7f7f7;
+        background-color: #2c2c2c; /* Dark background for contrast */
         border-radius: 8px;
     }
     /* User chat bubble styling */
     .user-bubble {
-        background-color: #DCF8C6;
+        background-color: #A5DC86; /* Light green */
         padding: 10px;
         border-radius: 8px;
         margin: 10px 0;
         text-align: right;
         font-size: 1rem;
+        color: black;
+        font-weight: bold;
     }
     /* Assistant chat bubble styling */
     .assistant-bubble {
-        background-color: #FFFFFF;
+        background-color: #ffffff; /* White background */
         padding: 10px;
         border-radius: 8px;
         margin: 10px 0;
         text-align: left;
         font-size: 1rem;
+        color: black; /* Make text fully visible */
+        font-weight: bold;
     }
     </style>
 """, unsafe_allow_html=True)
