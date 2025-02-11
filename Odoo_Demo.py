@@ -110,11 +110,14 @@ if submitted and user_input:
 # -------------------------------------------
 # We skip the first message (the system message) to show only user and assistant exchanges.
 st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
-for msg in st.session_state.conversation[1:]:
+
+# Reverse the message order so the most recent message appears at the top
+for msg in reversed(st.session_state.conversation[1:]):
     if msg["role"] == "user":
         st.markdown(f"<div class='user-bubble'><strong>You:</strong><br>{msg['content']}</div>", unsafe_allow_html=True)
     elif msg["role"] == "assistant":
         st.markdown(f"<div class='assistant-bubble'><strong>Assistant:</strong><br>{msg['content']}</div>", unsafe_allow_html=True)
+
 st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------
