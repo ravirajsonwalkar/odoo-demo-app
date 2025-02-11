@@ -6,94 +6,75 @@ from dotenv import load_dotenv
 # -------------------------------------------
 # CONFIGURATION & INITIALIZATION
 # -------------------------------------------
+# Load local .env (useful for local development) and/or use Streamlit secrets
 load_dotenv()
-
-openai_api_key = os.getenv("OPENAI_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
 if not openai_api_key:
-    st.error("OpenAI API Key not set in your .env file!")
+    st.error("OpenAI API Key not set in your environment!")
     st.stop()
 
 openai.api_key = openai_api_key
-MODEL = "gpt-4o"  # Adjust if needed
+MODEL = "gpt-4o"  # Adjust as needed
 
-# System message for the assistant’s behavior.
+# System message: instructs the assistant about its role.
 system_message = (
-    "You are an expert assistant for Odoo post-implementation support.\n"
-    "You have access to the full Odoo documentation and can help users with issues, "
-    "configurations, best practices, and troubleshooting.\n"
-    "Provide clear, step-by-step solutions based on the official documentation.\n"
+    "You are an expert assistant for Odoo post-implementation support. "
+    "You have access to the full Odoo documentation and can help users with issues, configurations, best practices, and troubleshooting. "
+    "Provide clear, step-by-step solutions based on the official documentation. "
     "If unsure, politely suggest checking with Odoo support or official forums."
 )
 
-# Initialize session state for conversation history.
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "system", "content": system_message}]
+# -------------------------------------------
+# SESSION STATE SETUP
+# -------------------------------------------
+# Initialize conversation history only once.
+if "conversation" not in st.session_state:
+    st.session_state.conversation = [{"role": "system", "content": system_message}]
 
 # -------------------------------------------
 # STREAMLIT LAYOUT
 # -------------------------------------------
 st.title("Odoo Post-Implementation Support Chatbot")
-st.markdown("Ask your questions about Odoo post-implementation support.")
+st.markdown("This chatbot retains conversation history so that it can understand context from previous messages.")
 
 # -------------------------------------------
 # HELPER FUNCTION: Generate ChatGPT Response
 # -------------------------------------------
-def generate_response(user_message, stream_output=True):
-    """
-    Append the user's message to the conversation history and get the assistant's reply.
-    Optionally stream the response.
-    """
-    st.session_state.messages.append({"role": "user", "content": user_message})
+def generate_response(user_message):
+    # Append user's new message to the conversation history.
+    st.session_state.conversation.append({"role": "user", "content": user_message})
     
-    assistant_reply = ""
+    # Generate a response using the entire conversation history.
+    try:
+        response = openai.ChatCompletion.create(
+            model=MODEL,
+            messages=st.session_state.conversation,
+            stream=False,  # Change to True if you want streaming (and update the UI accordingly)
+        )
+        assistant_reply = response.choices[0].message.content
+    except Exception as e:
+        assistant_reply = f"Error: {e}"
     
-    if stream_output:
-        # Use a placeholder for streaming tokens
-        response_placeholder = st.empty()
-        try:
-            response = openai.ChatCompletion.create(
-                model=MODEL,
-                messages=st.session_state.messages,
-                stream=True,  # enable streaming
-            )
-            for chunk in response:
-                delta = chunk.choices[0].delta
-                token = delta.get("content", "")
-                assistant_reply += token
-                response_placeholder.markdown(assistant_reply)
-        except Exception as e:
-            response_placeholder.error(f"Error: {e}")
-    else:
-        try:
-            response = openai.ChatCompletion.create(
-                model=MODEL,
-                messages=st.session_state.messages,
-            )
-            assistant_reply = response.choices[0].message.content
-            st.markdown(assistant_reply)
-        except Exception as e:
-            st.error(f"Error: {e}")
-    
-    st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+    # Append assistant's reply to the conversation history.
+    st.session_state.conversation.append({"role": "assistant", "content": assistant_reply})
 
 # -------------------------------------------
-# USER INPUT
+# USER INPUT SECTION
 # -------------------------------------------
-with st.form(key="chat_form", clear_on_submit=True):
-    user_input = st.text_input("Your message:", placeholder="Ask about Odoo support...")
-    submit_button = st.form_submit_button(label="Send")
+# You can use a form or simple text input with a button.
+user_input = st.text_input("Your message:", placeholder="Type your question here...")
 
-if submit_button and user_input:
-    generate_response(user_input, stream_output=True)
-    # Conditionally call experimental_rerun if available.
-    if hasattr(st, "experimental_rerun"):
-        st.experimental_rerun()
+# When the user clicks the "Send" button, process the input.
+if st.button("Send") and user_input:
+    generate_response(user_input)
+    # Optionally clear the text input by re-running the script:
+    st.experimental_rerun()
 
 # -------------------------------------------
 # DISPLAY CONVERSATION HISTORY
 # -------------------------------------------
-st.markdown("### Conversation")
-for msg in st.session_state.messages[1:]:  # Skip the system message for display.
+st.markdown("### Conversation History")
+for msg in st.session_state.conversation:
     if msg["role"] == "user":
         st.markdown(f"**You:** {msg['content']}")
     elif msg["role"] == "assistant":
