@@ -26,9 +26,25 @@ st.set_page_config(
 
 st.title("🚀 Odoo AI Support Chatbot")
 
-# Session state for industry selection
+# -------------------------------------------
+# INDUSTRY SELECTION BEFORE CHAT STARTS
+# -------------------------------------------
 if "selected_industry" not in st.session_state:
-    st.session_state.selected_industry = None
+    st.session_state.selected_industry = None  # Initialize industry selection
+
+if st.session_state.selected_industry is None:
+    st.subheader("Select Your Industry to Get Started")
+    
+    industry_options = ["Retail", "Manufacturing", "Services", "IT", "Finance", "Healthcare", "Other"]
+    selected_industry = st.selectbox("What industry do you work in?", industry_options)
+
+    if st.button("Start Chat"):
+        st.session_state.selected_industry = selected_industry
+        st.rerun()  # ✅ Updated from `st.experimental_rerun()` to `st.rerun()`
+
+else:
+    # Show the selected industry at the top
+    st.success(f"💼 Industry Selected: {st.session_state.selected_industry}")
 
 # -------------------------------------------
 # LANDING PAGE: ASK FOR USER'S INDUSTRY
