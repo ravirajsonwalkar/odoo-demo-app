@@ -2,7 +2,7 @@ import os
 import openai
 import streamlit as st
 from dotenv import load_dotenv
-import time  # For loading animation
+import time
 
 # -------------------------------------------
 # CONFIGURATION & INITIALIZATION
@@ -33,26 +33,25 @@ st.title("🚀 Odoo AI Support Chatbot")
 # INDUSTRY SELECTION - Appears only once
 # -------------------------------------------
 if "selected_industry" not in st.session_state:
-    st.session_state.selected_industry = None  # Initialize industry selection
+    st.session_state.selected_industry = None
 
 if st.session_state.selected_industry is None:
     st.subheader("🔍 Select Your Industry to Get Started")
-    
+
     industry_options = {
-        "Retail": "🛒 For businesses managing sales & inventory",
-        "Manufacturing": "🏭 For companies handling production & supply chains",
-        "Services": "💼 For service-based businesses & consultants",
-        "IT": "💻 For tech firms and software providers",
-        "Finance": "💰 For financial services & accounting firms",
-        "Healthcare": "🏥 For hospitals, clinics & healthcare management",
-        "Other": "🌍 For industries not listed"
+        "Retail": "🛒 Sales & inventory automation",
+        "Manufacturing": "🏭 Production & supply chain management",
+        "Services": "💼 Project management & invoicing",
+        "IT": "💻 Odoo development & deployment",
+        "Finance": "💰 Accounting & invoicing",
+        "Healthcare": "🏥 Patient & appointment management",
+        "Other": "🌍 General Odoo assistance"
     }
 
-    # Unique key to avoid duplicate element errors
     selected_industry = st.selectbox(
         "What industry do you work in?", 
         list(industry_options.keys()), 
-        format_func=lambda x: f"{x} - {industry_options[x]}",  # Show industry description
+        format_func=lambda x: f"{x} - {industry_options[x]}",
         key="industry_selection"
     )
 
@@ -61,15 +60,15 @@ if st.session_state.selected_industry is None:
         st.rerun()
 
 else:
-    # Show the selected industry at the top
     st.success(f"💼 Industry Selected: {st.session_state.selected_industry}")
 
     # -------------------------------------------
-    # CHATBOT UI
+    # CHATBOT UI - Odoo Support & Feature Guide
     # -------------------------------------------
     system_message = (
-        f"You are an AI assistant specializing in Odoo post-implementation support for the {st.session_state.selected_industry} industry. "
-        "Provide tailored solutions, best practices, and troubleshooting guidance specific to this industry."
+        f"You are an AI Odoo Assistant for {st.session_state.selected_industry}. "
+        "Your job is to help users find solutions from Odoo user guides, guide them to Odoo features, "
+        "assist with configurations, and provide general support for both new and existing Odoo users."
     )
 
     if "conversation" not in st.session_state:
@@ -80,21 +79,19 @@ else:
 
     st.markdown("""
         <style>
-        /* Hide default Streamlit menu and footer */
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
 
-        /* Chat container styling */
         .chat-container {
             max-height: 500px;
             overflow-y: auto;
             padding: 10px;
-            background-color: #2c2c2c; /* Dark background for contrast */
+            background-color: #2c2c2c;
             border-radius: 8px;
         }
-        /* User chat bubble styling */
+
         .user-bubble {
-            background-color: #A5DC86; /* Light green */
+            background-color: #A5DC86;
             padding: 10px;
             border-radius: 8px;
             margin: 10px 0;
@@ -103,15 +100,15 @@ else:
             color: black;
             font-weight: bold;
         }
-        /* Assistant chat bubble styling */
+
         .assistant-bubble {
-            background-color: #ffffff; /* White background */
+            background-color: #ffffff;
             padding: 10px;
             border-radius: 8px;
             margin: 10px 0;
             text-align: left;
             font-size: 1rem;
-            color: black; /* Make text fully visible */
+            color: black;
             font-weight: bold;
         }
         </style>
@@ -119,28 +116,41 @@ else:
 
     # Chat Input Form
     with st.form("chat_form", clear_on_submit=True):
-        user_input = st.text_input("Your message:", placeholder="Ask your Odoo-related question...")
+        user_input = st.text_input("Your message:", placeholder="Ask about Odoo configurations, features, or guides...")
         submitted = st.form_submit_button("Send")
 
     if submitted and user_input:
-        # Append the user's message to the conversation history
         st.session_state.conversation.append({"role": "user", "content": user_input})
 
-        # Display a loading indicator while generating a response
-        with st.spinner("🤖 Thinking..."):
-            time.sleep(1.5)  # Simulating response delay
+        # Simulating response delay for better UX
+        with st.spinner("🤖 Fetching the best solution for you..."):
+            time.sleep(1.5)
 
             try:
+                # Customize bot responses for Odoo configurations & features
                 response = openai.ChatCompletion.create(
                     model=MODEL,
                     messages=st.session_state.conversation,
                     stream=False
                 )
                 assistant_reply = response.choices[0].message.content
+
+                # If user asks about a module, guide them
+                feature_map = {
+                    "inventory": "📦 To manage inventory, go to **Odoo > Inventory**. Here you can track stock levels, shipments, and suppliers.",
+                    "sales": "💰 To manage sales, navigate to **Odoo > Sales**. You can create quotations, manage orders, and set pricing strategies.",
+                    "accounting": "📊 To manage accounting, visit **Odoo > Accounting**. It handles invoicing, reports, and bank reconciliation.",
+                    "manufacturing": "🏭 For manufacturing setups, go to **Odoo > Manufacturing**. This module manages work orders, BoMs, and production planning.",
+                    "crm": "📇 To track leads and customers, check **Odoo > CRM** for pipeline management and communication tracking."
+                }
+
+                for keyword, feature in feature_map.items():
+                    if keyword in user_input.lower():
+                        assistant_reply += f"\n\n**📌 Quick Guide:** {feature}"
+
             except Exception as e:
                 assistant_reply = f"⚠️ Error: {e}"
 
-        # Append the assistant's reply to the conversation history
         st.session_state.conversation.append({"role": "assistant", "content": assistant_reply})
 
     # Display Chat History
@@ -152,7 +162,7 @@ else:
             st.markdown(f"<div class='assistant-bubble'><strong>Assistant:</strong><br>{msg['content']}</div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Corrected Clear Conversation Button
+    # Clear Conversation Button
     if st.button("🗑️ Clear Conversation", key="clear_convo_button"):
         st.session_state.selected_industry = None  # Reset industry selection
         st.session_state.conversation = [
