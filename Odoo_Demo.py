@@ -12,8 +12,10 @@ if not openai_api_key:
     st.error("OpenAI API Key not set in your environment!")
     st.stop()
 
+# gpt-4o-mini to save API costs
+MODEL = "gpt-4o-mini"
+
 openai.api_key = openai_api_key
-MODEL = "gpt-4o"  # Adjust the model if needed
 
 # -------------------------------------------
 # APP LAYOUT & INDUSTRY SELECTION
@@ -27,10 +29,7 @@ st.set_page_config(
 st.title("🚀 Odoo AI Support Chatbot")
 
 # -------------------------------------------
-# INDUSTRY SELECTION BEFORE CHAT STARTS
-# -------------------------------------------
-# -------------------------------------------
-# INDUSTRY SELECTION BEFORE CHAT STARTS
+# INDUSTRY SELECTION - Appears only once
 # -------------------------------------------
 if "selected_industry" not in st.session_state:
     st.session_state.selected_industry = None  # Initialize industry selection
@@ -40,35 +39,19 @@ if st.session_state.selected_industry is None:
     
     industry_options = ["Retail", "Manufacturing", "Services", "IT", "Finance", "Healthcare", "Other"]
     
-    # ✅ Add a unique key to avoid duplicate element errors
+    # Unique key to avoid duplicate element errors
     selected_industry = st.selectbox(
         "What industry do you work in?", 
         industry_options, 
         key="industry_selection"
     )
 
-    if st.button("Start Chat", key="start_chat_button"):  # Unique key added
+    if st.button("Start Chat", key="start_chat_button"):
         st.session_state.selected_industry = selected_industry
-        st.rerun()  # ✅ Correct function to refresh the app
+        st.rerun()  # Updated from `st.experimental_rerun()`
 
 else:
     # Show the selected industry at the top
-    st.success(f"💼 Industry Selected: {st.session_state.selected_industry}")
-
-# -------------------------------------------
-# LANDING PAGE: ASK FOR USER'S INDUSTRY
-# -------------------------------------------
-if st.session_state.selected_industry is None:
-    st.subheader("Select Your Industry to Get Started")
-    industry_options = ["Retail", "Manufacturing", "Services", "IT", "Finance", "Healthcare", "Other"]
-    selected_industry = st.selectbox("What industry do you work in?", industry_options)
-
-    if st.button("Start Chat"):
-        st.session_state.selected_industry = selected_industry
-        st.experimental_rerun()
-
-else:
-    # Display selected industry at the top
     st.success(f"💼 Industry Selected: {st.session_state.selected_industry}")
 
     # -------------------------------------------
@@ -153,8 +136,8 @@ else:
             st.markdown(f"<div class='assistant-bubble'><strong>Assistant:</strong><br>{msg['content']}</div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Clear Conversation Button
-    if st.button("Clear Conversation"):
+    # Corrected Clear Conversation Button
+    if st.button("Clear Conversation", key="clear_convo_button"):
         st.session_state.selected_industry = None  # Reset industry selection
         st.session_state.conversation = [{"role": "system", "content": system_message}]
-        st.experimental_rerun()
+        st.rerun()  # Updated from `st.experimental_rerun()`
