@@ -1,199 +1,103 @@
-# Odoo AI Chatbot - Comprehensive Product Requirements Document (PRD)
+# Odoo AI Support Chatbot
 
-## 1. INTRODUCTION
+An intelligent, industry-specific AI assistant that provides personalized Odoo ERP support, guidance, and feature recommendations using the power of GPT-4.
 
-### 1.1 Purpose
-This document outlines the implementation requirements for the Odoo AI Chatbot, ensuring accurate, efficient, and context-aware support for Odoo users across standard and custom implementations.
+## Features
 
-### 1.2 Intended Audience
-- Development teams implementing the OWL-based frontend and AI backend
-- Project stakeholders and product managers
-- QA teams responsible for validation and testing
-- Technical architects designing system integration
-- Odoo partners deploying and maintaining the solution
-- Custom module developers and maintainers
+- **Industry-Specific Guidance**: Tailored support for Retail, Manufacturing, Services, IT, Finance, Healthcare, and more
+- **Interactive Chat Interface**: Clean, intuitive Streamlit UI for natural conversations
+- **Powered by GPT-4o-mini**: High-quality responses while keeping API costs reasonable
+- **Contextual Feature Guides**: Automatic detection of module-specific questions with tailored navigation instructions
+- **Conversation Memory**: Maintains context throughout your session for more meaningful assistance
+- **Professional UI**: Custom-styled chat bubbles for better conversation flow
+- **Secure API Handling**: Supports both .env files and Streamlit secrets for API key management
 
-### 1.3 Scope
-The Odoo AI Chatbot is a fully integrated assistant designed to work natively within the Odoo ERP platform, supporting both standard and custom implementations.
+## Installation
 
-#### Core Functionalities
-- Real-time AI-powered assistance for Odoo configuration and troubleshooting
-- Interactive chat UI built using OWL (Odoo Web Library)
-- Google OAuth authentication for secure user access
-- Smart Screenshot-Based Query Resolution
-- Hallucination Prevention Mechanism
-- Direct module navigation & quick actions
-- Conversation history management & search
-- Guided ticket submission for unresolved queries
-- Custom module support and documentation integration
-- Version-aware responses and compatibility checking
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/odoo-ai-chatbot.git
+   cd odoo-ai-chatbot
+   ```
 
-## 2. SYSTEM ARCHITECTURE
+2. Install required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### 2.1 AI Model Management
-#### Version Control & Updates
-- Automated model updates for new Odoo versions
-- Version-specific model variants
-- Custom module knowledge integration
-- A/B testing framework for model improvements
-- Performance monitoring and degradation detection
+3. Set up your OpenAI API key:
+   - Create a `.env` file in the project root with:
+     ```
+     OPENAI_API_KEY=your_openai_api_key_here
+     ```
+   - Or use Streamlit secrets management when deploying
 
-#### Training Data Management
-- Standard Odoo documentation ingestion pipeline
-- Custom module documentation integration system
-- Training data validation framework
-- Conflict resolution for contradicting information
-- Data freshness monitoring and update triggers
+## Usage
 
-### 2.2 Custom Module Integration
-#### Documentation Integration
-- Automated custom module documentation ingestion
-- Version control for custom documentation
-- Documentation format standardization
-- Custom-to-standard feature mapping
-- Conflict detection and resolution
-- Real-time documentation updates
+1. Start the Streamlit application:
+   ```bash
+   streamlit run app.py
+   ```
 
-#### Custom Field Management
-- Custom field detection and categorization
-- Dependency mapping and analysis
-- Constraint validation system
-- Custom business logic integration
-- Field relationship visualization
+2. Select your industry from the dropdown menu
+3. Start chatting with the AI assistant about any Odoo-related questions
 
-### 2.3 Performance Requirements
-#### System Boundaries
-- Maximum concurrent users: 500+
-- Response time: < 2 seconds for AI responses
-- Screenshot processing: < 3 seconds
-- Maximum file size for screenshots: 10MB
-- API rate limits: 100 requests/minute per user
-- Memory usage: < 2GB per instance
+## Example Questions
 
-#### Monitoring & Scaling
-- Real-time performance monitoring
-- Automatic scaling triggers
-- Resource usage tracking
-- Error rate monitoring
-- User satisfaction metrics
+- "How do I set up inventory tracking in Odoo?"
+- "What's the best way to configure manufacturing operations?"
+- "Can you explain how the CRM pipeline works?"
+- "How do I create a custom invoice template?"
+- "What Odoo modules would benefit a retail business the most?"
 
-## 3. TECHNICAL REQUIREMENTS
+## Customization
 
-### 3.1 Integration Requirements
-#### API Management
-- Rate limiting strategy: Token bucket algorithm
-- Retry mechanism with exponential backoff
-- Error handling and logging
-- Version compatibility checking
-- Custom endpoint management
+### Modifying Industry Options
 
-#### Failover Mechanisms
-- Primary-secondary deployment
-- Automatic failover triggers
-- Data consistency checking
-- Recovery procedures
-- State management during failover
+Edit the `industry_options` dictionary to add or modify available industries:
 
-### 3.2 Custom Implementation Support
-#### Module Analysis
-- Custom module code parsing
-- Business logic extraction
-- Dependency mapping
-- Integration point identification
-- Conflict detection
+```python
+industry_options = {
+    "New Industry": "Description of industry focus",
+    # Add more industries...
+}
+```
 
-#### Validation System
-- Custom implementation verification
-- Code analysis for security
-- Performance impact assessment
-- Compatibility checking
-- Error prediction
+### Changing the AI Model
 
-## 4. SECURITY AND COMPLIANCE
+To use a different OpenAI model, modify the `MODEL` variable:
 
-### 4.1 Data Protection
-- AES-256 encryption for stored data
-- SSL/TLS for transmission
-- Custom field data protection
-- Screenshot security handling
-- Access control management
+```python
+MODEL = "gpt-4" # or any other OpenAI model
+```
 
-### 4.2 Compliance Requirements
-- GDPR compliance
-- CCPA compliance
-- Industry-specific regulation support
-- Audit trail maintenance
-- Data retention policies
+## Requirements
 
-## 5. TESTING REQUIREMENTS
+- Python 3.7+
+- OpenAI API key
+- Streamlit
+- python-dotenv
 
-### 5.1 Integration Testing
-- Custom module integration testing
-- API endpoint testing
-- Performance testing under load
-- Security penetration testing
-- Compatibility testing across versions
+## Contributing
 
-### 5.2 AI Model Testing
-- Response accuracy validation
-- Custom module understanding verification
-- Version compatibility testing
-- Edge case handling
-- Response time testing
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 6. DEPLOYMENT AND MAINTENANCE
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-### 6.1 Deployment Strategy
-- Blue-green deployment support
-- Rollback procedures
-- Database migration handling
-- Version control requirements
-- Custom module deployment coordination
+## License
 
-### 6.2 Maintenance Procedures
-- Regular model updates
-- Custom module documentation updates
-- Performance optimization
-- Security patches
-- User feedback integration
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 7. VERSION COMPATIBILITY
+## Acknowledgements
 
-### 7.1 Version Matrix
-- Odoo version support: 14.0, 15.0, 16.0, 17.0
-- Custom module version tracking
-- Compatibility checking system
-- Migration path documentation
-- Version-specific features tracking
+- [OpenAI](https://openai.com/) for their powerful GPT models
+- [Streamlit](https://streamlit.io/) for the interactive web framework
+- [Odoo](https://www.odoo.com/) for their comprehensive ERP system
 
-## 8. IMPLEMENTATION PHASES
+---
 
-### Phase 1 (Core Features)
-- OWL-based chatbot UI
-- Google OAuth integration
-- Basic AI assistance
-- Standard module support
-- Initial performance monitoring
-
-### Phase 2 (Custom Support)
-- Custom module documentation integration
-- Advanced AI training
-- Version compatibility system
-- Enhanced security features
-
-### Phase 3 (Advanced Features)
-- Real-time custom module updates
-- Advanced analytics
-- Predictive assistance
-- Multi-language support
-- Advanced automation features
-
-## 9. SUCCESS METRICS
-
-- Response accuracy rate: > 95%
-- Custom module understanding: > 90%
-- User satisfaction score: > 4.5/5
-- Response time compliance: > 99%
-- System availability: 99.99%
-- Custom implementation coverage: > 95%
-
+Created for the Odoo community
